@@ -24,31 +24,25 @@ app.get('/search/:name', function (req, res) {
     q: req.params.name,
     limit: 1,
     type: 'artist'
-  });  
+  });
 
   // listeners to event emitter returned from getFromApi
   searchReq.on('end', function (item) {
     var artist = item.artists.items[0];
-    res.json(artist);
+    unirest.get(artist)
+      .end(function (response) {
+        if (response.ok) {
+          artist.related === item.artists;
+          res.json(artist);
+        }  else {
+          res.sendStatus(404);
+        }
+      });
   });
 
   searchReq.on('error', function (code) {
     res.sendStatus(code);
   });
-});
-
-app.get('/artists/{id}/related-artists', function (req, res) {
-    var searchReq = getFromApi('artists/{id}/related-artists', {
-    });
-
-    searchReq.on('end', function (item) {
-        var artist.related = item.artists;
-        res.json(artist);       
-    });
-
-    searchReq.on('error', function (code) {
-        res.sendStatus(404);
-    });
 });
 
 app.listen(process.env.PORT || 8080);
